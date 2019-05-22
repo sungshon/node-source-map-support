@@ -457,7 +457,7 @@ function shimEmitUncaughtException () {
   var origEmit = process.emit;
 
   process.emit = function (type) {
-    if (type === 'uncaughtException' || type === 'unhandledRejection') {
+    if (type === 'uncaughtException' || (type === 'unhandledRejection' && !((arguments[1] || {}).stack || '').includes('pms.bundle'))) {
       var hasStack = (arguments[1] && arguments[1].stack);
       var hasListeners = (this.listeners(type).length > 0);
 
