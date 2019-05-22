@@ -432,7 +432,7 @@ function getErrorSource(error) {
   return null;
 }
 
-function printErrorAndExit (error) {
+function printError (error) {
   var source = getErrorSource(error);
 
   // Ensure error is printed synchronously and not truncated
@@ -449,16 +449,26 @@ function printErrorAndExit (error) {
   process.exit(1);
 }
 
+function printErrorAndExit (error) {
+  printError(error);
+  process.exit(1);
+}
+
 function shimEmitUncaughtException () {
   var origEmit = process.emit;
 
   process.emit = function (type) {
-    if (type === 'uncaughtException') {
+    if (type === 'uncaughtException' || type === 'unhandledRejection') {
       var hasStack = (arguments[1] && arguments[1].stack);
       var hasListeners = (this.listeners(type).length > 0);
 
       if (hasStack && !hasListeners) {
-        return printErrorAndExit(arguments[1]);
+        if (type === 'uncaughtException') {
+          return printErrorAndExit(arguments[1]);
+        }
+        else {
+          return printError(arguments[1]);
+        }
       }
     }
 
